@@ -1,0 +1,16 @@
+<li class="list-group-item d-flex justify-content-between align-items-center">
+    <div>
+        <strong><%= user.user_name %></strong>
+        &mdash; <%= user.email %>
+        <span class="badge bg-<%= user.user_type==='admin'?'warning':'secondary' %> ms-2">
+      <%= user.user_type %>
+    </span>
+    </div>
+    <div>
+        <% if (user.user_type==='user') { %>
+            <a href="/admin/promote/<%= user._id %>" class="btn btn-sm btn-success">Promote</a>
+        <% } else { %>
+            <a href="/admin/demote/<%= user._id %>" class="btn btn-sm btn-danger">Demote</a>
+        <% } %>
+    </div>
+</li>

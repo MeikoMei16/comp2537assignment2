@@ -1,0 +1,30 @@
+{
+  "name": "comp2537assignment02",
+  "version": "1.0.0",
+  "description": "comp2537",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0"
+  },
+  "author": "May <ymei7@my.bcit.ca>",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bootstrap": "^5.3.3",
+    "connect-mongo": "^5.1.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.1",
+    "uuid": "^11.1.0"
+  }
+}

@@ -1,0 +1,22 @@
+/* src/dashboard.css */
+.crud-section {
+  margin: 20px 0;
+}
+
+.crud-section button {
+  margin: 5px 0;
+}
+
+.error-message,
+.success-message {
+  margin: 10px 0;
+  display: none;
+}
+
+.error-message {
+  color: red;
+}
+
+.success-message {
+  color: green;
+}
