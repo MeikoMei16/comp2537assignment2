@@ -90,19 +90,30 @@ app.get('/signup', (req, res) => {
 });
 app.post('/signup', async (req, res, next) => {
   const { username, email, password } = req.body;
-  if (!username||!email||!password) {
+  if (!username || !email || !password) {
     return res.render('signup', { error: 'All fields are required.' });
   }
   try {
     const hash = await bcrypt.hash(password, 12);
-    const user = await User.create({ user_name: username, email, password: hash });
+    const user = await User.create({
+      user_name: username,
+      email,
+      password: hash,
+    });
     req.session.user = {
-      _id:       user._id,
+      _id: user._id,
       user_name: user.user_name,
-      user_type: user.user_type
+      user_type: user.user_type,
     };
-    return res.redirect('/members');
-  } catch(err) {
+    // Explicitly save the session before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return next(err);
+      }
+      return res.redirect('/members');
+    });
+  } catch (err) {
     if (err.code === 11000) {
       const dupField = err.keyValue.user_name ? 'Username' : 'Email';
       return res.render('signup', { error: `${dupField} already exists.` });
@@ -117,21 +128,28 @@ app.get('/login', (req, res) => {
 });
 app.post('/login', async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email||!password) {
+  if (!email || !password) {
     return res.render('login', { error: 'Email and password are required.' });
   }
   try {
     const user = await User.findOne({ email });
-    if (!user || !await bcrypt.compare(password,user.password)) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.render('login', { error: 'Invalid credentials.' });
     }
     req.session.user = {
-      _id:       user._id,
+      _id: user._id,
       user_name: user.user_name,
-      user_type: user.user_type
+      user_type: user.user_type,
     };
-    return res.redirect('/members');
-  } catch(err) {
+    // Explicitly save the session before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return next(err);
+      }
+      return res.redirect('/members');
+    });
+  } catch (err) {
     next(err);
   }
 });
@@ -139,24 +157,31 @@ app.post('/login', async (req, res, next) => {
 // ――― Admin Login (from home "/") ―――
 app.post('/admin-login', async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email||!password) {
+  if (!email || !password) {
     return res.render('index', { error: 'Email and password required.' });
   }
   try {
     const user = await User.findOne({ email });
-    if (!user || !await bcrypt.compare(password,user.password)) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.render('index', { error: 'Invalid credentials.' });
     }
     if (user.user_type !== 'admin') {
       return res.render('index', { error: 'You are not an admin.' });
     }
     req.session.user = {
-      _id:       user._id,
+      _id: user._id,
       user_name: user.user_name,
-      user_type: user.user_type
+      user_type: user.user_type,
     };
-    return res.redirect('/admin');
-  } catch(err) {
+    // Explicitly save the session before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return next(err);
+      }
+      return res.redirect('/admin');
+    });
+  } catch (err) {
     next(err);
   }
 });
@@ -206,17 +231,6 @@ app.get('/admin/demote/:id', (req, res, next) => {
   User.updateOne({ _id: req.params.id }, { $set: { user_type: 'user' } })
       .then(() => res.redirect('/admin'))
       .catch(next);
-});
-
-// ─── MEMBERS GRID ───────────────────────────────────────────────────────────────
-// GET /members — show Bootstrap grid of all 3 images
-app.get('/members', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/');
-  }
-  // your three images must live in /public/images/
-  const images = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
-  res.render('members', { user: req.session.user, images });
 });
 
 
