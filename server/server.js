@@ -109,7 +109,7 @@ app.post('/signup', async (req, res, next) => {
       // Add 500ms delay before redirect
       setTimeout(() => {
         return res.redirect('/members');
-      }, 500);
+      }, 1000);
     });
   } catch(err) {
     if (err.code === 11000) {
@@ -147,7 +147,7 @@ app.post('/login', async (req, res, next) => {
       // Add 500ms delay before redirect
       setTimeout(() => {
         return res.redirect('/members');
-      }, 500);
+      }, 1000);
     });
   } catch(err) {
     next(err);
@@ -181,7 +181,7 @@ app.post('/admin-login', async (req, res, next) => {
       // Add 500ms delay before redirect
       setTimeout(() => {
         return res.redirect('/admin');
-      }, 500);
+      }, 1000);
     });
   } catch(err) {
     next(err);
