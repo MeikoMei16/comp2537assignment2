@@ -17,6 +17,8 @@ const __dirname  = path.dirname(__filename);
 const app       = express();
 const port      = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 // Ensure env vars
 if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET not set');
 if (!process.env.MONGO_URI)     throw new Error('MONGO_URI not set');
@@ -71,7 +73,10 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 function isAuthenticated(req, res, next) {
+  console.log('isAuthenticated - Session:', req.session);
+  console.log('isAuthenticated - User:', req.session.user);
   if (req.session.user) return next();
+  console.log('isAuthenticated - Redirecting to /login');
   res.redirect('/login');
 }
 
@@ -109,7 +114,7 @@ app.post('/signup', async (req, res, next) => {
       // Add 500ms delay before redirect
       setTimeout(() => {
         return res.redirect('/members');
-      }, 1000);
+      }, 2000);
     });
   } catch(err) {
     if (err.code === 11000) {
@@ -124,6 +129,7 @@ app.post('/signup', async (req, res, next) => {
 app.get('/login', (req, res) => {
   res.render('login', { error: null });
 });
+
 app.post('/login', async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -131,25 +137,26 @@ app.post('/login', async (req, res, next) => {
   }
   try {
     const user = await User.findOne({ email });
-    if (!user || !await bcrypt.compare(password,user.password)) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.render('login', { error: 'Invalid credentials.' });
     }
     req.session.user = {
-      _id:       user._id,
+      _id: user._id,
       user_name: user.user_name,
-      user_type: user.user_type
+      user_type: user.user_type,
     };
+    console.log('Session before save:', req.session); // Log session data
     req.session.save((err) => {
       if (err) {
         console.error('Session save error:', err);
         return next(err);
       }
-      // Add 500ms delay before redirect
+      console.log('Session saved successfully:', req.session); // Confirm save
       setTimeout(() => {
         return res.redirect('/members');
       }, 1000);
     });
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
 });
@@ -181,7 +188,7 @@ app.post('/admin-login', async (req, res, next) => {
       // Add 500ms delay before redirect
       setTimeout(() => {
         return res.redirect('/admin');
-      }, 1000);
+      }, 2000);
     });
   } catch(err) {
     next(err);
